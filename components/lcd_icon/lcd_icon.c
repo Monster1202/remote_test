@@ -7,6 +7,7 @@
 #include "esp_spiffs.h"
 #include "bat_adc.h"
 #include "bsp_lcd.h"
+#include "rm68120.h"
 
 #define icon1_x 663
 #define icon1_y 25
@@ -40,6 +41,23 @@ void bat_adc_get(void)
     parameter_write_battery(battery);
     printf("bat=%d\r\n",battery);
 }
+int cnt = 0;
+void lcd_clear_task(void)
+{
+    while(1){
+        if(cnt % 2000 == 1895){       //2999     
+            //esp_restart();
+            ESP_LOGI(TAG, "lcd_clear_icon_area1");
+            //bsp_lcd_reset();
+            lcd_clear_icon_area(lcd_panel, COLOR_BLACK);
+            //vTaskDelay(1000 / portTICK_RATE_MS);
+            //lcd_clear(lcd_panel, COLOR_BLACK);
+            //ESP_LOGI(TAG, "lcd_clear_icon_area2");
+        }
+        vTaskDelay(100 / portTICK_RATE_MS);
+    }
+
+}
 void lcd_icon_task(void)
 {
     // parameter_read_centralizer();
@@ -55,7 +73,7 @@ void lcd_icon_task(void)
     uint8_t *lcd_buffer = (uint8_t *)heap_caps_malloc(ICON_SIZE, MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
     assert(lcd_buffer != NULL);
     adc_init();
-    int cnt = 0;
+    
     int refresh = 1;
     while(1){
         get_remote_parameter(&remote_buf);
@@ -149,16 +167,20 @@ void lcd_icon_task(void)
         if(cnt % 300 == 1){
             bat_adc_get();
         }  
-        else if(cnt % 6000 == 5999){       //2999
+        // else if(cnt % 200 == 22){       //2999     
+        //     refresh = 1;
+        //     //esp_restart();
+        //     //ESP_LOGI(TAG, "lcd_clear_icon_area1");
+        //     //bsp_lcd_reset();
+        //     //lcd_clear_icon_area(lcd_panel, COLOR_BLACK);
+        //     //vTaskDelay(1000 / portTICK_RATE_MS);
+        //     //lcd_clear(lcd_panel, COLOR_BLACK);
+        //     //ESP_LOGI(TAG, "lcd_clear_icon_area2");
+        // }
+        else if(cnt % 2000 == 1900){    
             refresh = 1;
-            esp_restart();
-            ESP_LOGI(TAG, "lcd_clear_icon_area1");
-            lcd_clear_icon_area(lcd_panel, COLOR_BLACK);
-            //lcd_clear(lcd_panel, COLOR_BLACK);
-            //ESP_LOGI(TAG, "lcd_clear_icon_area2");
-            
         }
-        parameter_write_refresh(refresh);
+        //parameter_write_refresh(refresh);
     }
     free(lcd_buffer);
     free(jpg_buffer);

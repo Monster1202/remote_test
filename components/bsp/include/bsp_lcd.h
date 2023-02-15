@@ -143,7 +143,7 @@ esp_err_t lcd_clear_icon_area(esp_lcd_panel_t *panel, uint16_t color);
 void lcd_draw_picture_test(esp_lcd_panel_t *panel);
 void lcd_speed_test(esp_lcd_panel_t *panel);
 void lcd_draw_picture_t(esp_lcd_panel_t *panel,uint16_t *pixels);
-esp_err_t bsp_lcd_reset(void);
+void bsp_lcd_reset(void);
 
 #ifdef __cplusplus
 }

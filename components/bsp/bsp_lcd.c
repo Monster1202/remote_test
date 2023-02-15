@@ -120,6 +120,19 @@ esp_err_t bsp_lcd_init(void)
     return ESP_OK;
 }
 
+void bsp_lcd_reset(void)
+{
+    
+    esp_lcd_panel_reset(lcd_panel);   // LCD Reset
+    //esp_lcd_panel_del(lcd_panel);
+    vTaskDelay(200 / portTICK_RATE_MS);
+    //lcd_clear(lcd_panel, COLOR_BLACK);
+    esp_lcd_panel_init(lcd_panel);    // LCD init
+    //vTaskDelay(200 / portTICK_RATE_MS);
+    //lcd_clear_fast(lcd_panel, COLOR_BLACK);
+    //lcd_clear_icon_area(lcd_panel, COLOR_BLACK);
+}
+
 esp_err_t lcd_clear(esp_lcd_panel_t *panel, uint16_t color)
 {
     lcd_panel_t *rm68120 = __containerof(panel, lcd_panel_t, base);
@@ -177,7 +190,7 @@ esp_err_t lcd_clear_icon_area(esp_lcd_panel_t *panel, uint16_t color)
         for (uint16_t i = 0; i < 160 * block_line; i++) {
             buffer[i] = color;
         }
-        for (int y = 0; y < rm68120->height; y += block_line) {
+        for (int y = 0; y < 480; y += block_line) {
             esp_lcd_panel_draw_bitmap(panel, 640, y, 800, y+block_line, buffer);
         }
         heap_caps_free(buffer);

@@ -575,7 +575,7 @@
 				},
 				{
 					"backtrace" : 16,
-					"define" : "PROJECT_VER=\"1.0.0.15\""
+					"define" : "PROJECT_VER=\"1.0.2.2\""
 				}
 			],
 			"includes" : 

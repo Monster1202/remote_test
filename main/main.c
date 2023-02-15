@@ -67,7 +67,7 @@ void print_heapsize(void)
 
 void app_main(void)
 {
-    print_heapsize();
+    //print_heapsize();
     /* Initialize I2C 400KHz */
     ESP_ERROR_CHECK(bsp_i2c_init(I2C_NUM_0, 400000));
 
@@ -76,19 +76,18 @@ void app_main(void)
     lcd_clear_fast(lcd_panel, COLOR_BLACK);
     //lcd_draw_picture_test(lcd_panel);
     //lcd_draw_picture_t(lcd_panel);
-    //xTaskCreatePinnedToCore(Task1, "Task1", 4096, NULL, 1, NULL,  0);
-
     para_init();
     gpio_init();
 
     //xTaskCreatePinnedToCore(touch_input, "touch_input", 4096, NULL, 10, NULL,  0);
     xTaskCreatePinnedToCore(lcd_icon_task, "lcd_icon_task", 8192, NULL, 24, NULL,  0);
+    xTaskCreatePinnedToCore(lcd_clear_task, "lcd_clear_task", 4096, NULL, 5, NULL,  0);
     wifi_connect();
-    xTaskCreate(wifi_scan, "wifi_scan", 4096, NULL, 6, NULL);
+    //xTaskCreate(wifi_scan, "wifi_scan", 4096, NULL, 6, NULL);
 
     uint8_t *jpeg_buf = heap_caps_malloc(BOOT_ANIMATION_MAX_SIZE, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
     assert(jpeg_buf != NULL);
-    xTaskCreatePinnedToCore(lcd_draw, "lcd_draw", 10240, NULL, 22, NULL,  1);  //(void *)(lcd_buffer)
+    xTaskCreatePinnedToCore(lcd_draw, "lcd_draw", 10240, NULL, 21, NULL,  1);  //(void *)(lcd_buffer)
     xTaskCreatePinnedToCore(http_test_task, "http_test_task", 10240, (void *)(jpeg_buf), 23, NULL,  0);
 
     // esp_vfs_spiffs_conf_t spiffs_config = {
@@ -97,14 +96,11 @@ void app_main(void)
     //     .max_files              = 5,
     //     .format_if_mount_failed = false
     // };
-
     // ESP_ERROR_CHECK(esp_vfs_spiffs_register(&spiffs_config));
-
     // uint8_t *jpeg_buf = heap_caps_malloc(BOOT_ANIMATION_MAX_SIZE, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
     // assert(jpeg_buf != NULL);
     // uint8_t *lcd_buffer = (uint8_t *)heap_caps_malloc(DEMO_MAX_TRANFER_SIZE, MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
     // assert(lcd_buffer != NULL);
-
     //free(lcd_buffer);
     //free(jpeg_buf);
 
@@ -134,8 +130,10 @@ void app_main(void)
         //     mjpegdraw(jpeg_buf, read_bytes, lcd_buffer, lcd_write_bitmap);
         //     ESP_LOGD(TAG, "file_name: %s, fd: %p, read_bytes: %d, free_heap: %d", file_name, fd, read_bytes, esp_get_free_heap_size());
         // }
-        print_heapsize();
         vTaskDelay(20000 / portTICK_RATE_MS);
+        print_heapsize();
+        //  ESP_LOGI(TAG, "lcd_clear_icon_area1");
+        //  lcd_clear_icon_area(lcd_panel, COLOR_BLACK);
         /* task monitor code if necessary */
     }
 }

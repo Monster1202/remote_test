@@ -19,7 +19,7 @@ extern "C" {
 void jpg_icon_draw(void *jpg_b,void *lcd_b,size_t i,uint32_t x_0,uint32_t y_0,uint32_t width,uint32_t hight);
 void lcd_icon_task(void);
 void spiff_init(void);
-
+void lcd_clear_task(void);
 #ifdef __cplusplus
 }
 #endif

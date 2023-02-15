@@ -17,10 +17,10 @@
    If you'd rather not, just change the below entries to strings with
    the config you want - ie #define EXAMPLE_WIFI_SSID "mywifissid"
 */
-#define EXAMPLE_ESP_WIFI_SSID "yyg"//"SHKJ2020"   //CONFIG_ESP_WIFI_SSID  ////"CLEANING-SYSTEM"//
+#define EXAMPLE_ESP_WIFI_SSID "yyg"      //"SHKJ2020"   //CONFIG_ESP_WIFI_SSID  ////"CLEANING-SYSTEM"//
 #define EXAMPLE_ESP_WIFI_PASS "12345678" //"shkj1234."  //CONFIG_ESP_WIFI_PASSWORD  // "12345678"//
 
-#define EXAMPLE_ESP_MAXIMUM_RETRY  150//CONFIG_ESP_MAXIMUM_RETRY
+#define EXAMPLE_ESP_MAXIMUM_RETRY 150 // CONFIG_ESP_MAXIMUM_RETRY
 
 /* FreeRTOS event group to signal when we are connected*/
 static EventGroupHandle_t s_wifi_event_group;
@@ -31,47 +31,55 @@ esp_event_handler_instance_t instance_got_ip;
  * - we are connected to the AP with an IP
  * - we failed to connect after the maximum amount of retries */
 #define WIFI_CONNECTED_BIT BIT0
-#define WIFI_FAIL_BIT      BIT1
-// CONFIG_ESP_SYSTEM_EVENT_TASK_STACK_SIZE 
+#define WIFI_FAIL_BIT BIT1
+// CONFIG_ESP_SYSTEM_EVENT_TASK_STACK_SIZE
 // CONFIG_ESP_SYSTEM_EVENT_QUEUE_SIZE
 static const char *TAG = "wifi station";
 static int s_retry_num = 0;
 
-static void event_handler(void* arg, esp_event_base_t event_base,
-                                int32_t event_id, void* event_data)
+static void event_handler(void *arg, esp_event_base_t event_base,
+                          int32_t event_id, void *event_data)
 {
-    if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
+    if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START)
+    {
         esp_wifi_connect();
-    } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
+    }
+    else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED)
+    {
         parameter_write_wifi_connection(0);
-        if (s_retry_num < EXAMPLE_ESP_MAXIMUM_RETRY) {
+        if (s_retry_num < EXAMPLE_ESP_MAXIMUM_RETRY)
+        {
             esp_wifi_connect();
             s_retry_num++;
             ESP_LOGI(TAG, "retry to connect to the AP");
-        } 
-        else if(s_retry_num >= EXAMPLE_ESP_MAXIMUM_RETRY){
-            //wifi_reset();
+        }
+        else if (s_retry_num >= EXAMPLE_ESP_MAXIMUM_RETRY)
+        {
+            // wifi_reset();
             esp_restart();
             ESP_LOGI(TAG, "reset STA");
             s_retry_num = 1;
         }
-        else {
+        else
+        {
             xEventGroupSetBits(s_wifi_event_group, WIFI_FAIL_BIT);
         }
-        ESP_LOGI(TAG,"connect to the AP fail");
-        
-    } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
-        ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
+        ESP_LOGI(TAG, "connect to the AP fail");
+    }
+    else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP)
+    {
+        ip_event_got_ip_t *event = (ip_event_got_ip_t *)event_data;
         ESP_LOGI(TAG, "got ip:" IPSTR, IP2STR(&event->ip_info.ip));
         s_retry_num = 0;
         xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
         parameter_write_wifi_connection(1);
     }
-    else{
-        if(event_base == IP_EVENT)
-            ESP_LOGI(TAG, "IP_EVENT,event_id:%d",event_id);
-        else if(event_base == WIFI_EVENT)
-            ESP_LOGI(TAG, "WIFI_EVENT,event_id:%d",event_id);
+    else
+    {
+        if (event_base == IP_EVENT)
+            ESP_LOGI(TAG, "IP_EVENT,event_id:%d", event_id);
+        else if (event_base == WIFI_EVENT)
+            ESP_LOGI(TAG, "WIFI_EVENT,event_id:%d", event_id);
     }
 }
 
@@ -82,14 +90,14 @@ void wifi_init_sta(void)
     char *wifi_pass = {0};
     wifi_ssid = parameter_read_wifi_ssid();
     wifi_pass = parameter_read_wifi_pass();
-    ESP_LOGI(TAG, "wifi_ssid:%s",wifi_ssid); 
-    ESP_LOGI(TAG, "wifi_pass:%s",wifi_pass); 
+    ESP_LOGI(TAG, "wifi_ssid:%s", wifi_ssid);
+    ESP_LOGI(TAG, "wifi_pass:%s", wifi_pass);
 
     s_wifi_event_group = xEventGroupCreate();
 
     ESP_ERROR_CHECK(esp_netif_init());
 
-    ESP_ERROR_CHECK(esp_event_loop_create_default());  //xTaskCreatePinnedToCore
+    ESP_ERROR_CHECK(esp_event_loop_create_default()); // xTaskCreatePinnedToCore
     esp_netif_create_default_wifi_sta();
 
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
@@ -115,41 +123,46 @@ void wifi_init_sta(void)
             /* Setting a password implies station will connect to all security modes including WEP/WPA.
              * However these modes are deprecated and not advisable to be used. Incase your Access point
              * doesn't support WPA2, these mode can be enabled by commenting below line */
-	     .threshold.authmode = WIFI_AUTH_WPA2_PSK,
+            .threshold.authmode = WIFI_AUTH_WPA_PSK,
         },
     };
-    ESP_LOGI(TAG, "strlen(wifi_ssid) + 1:%d",strlen(wifi_ssid) + 1);
-    for(uint8_t i=0; i< strlen(wifi_ssid) + 1;i++)
+    ESP_LOGI(TAG, "strlen(wifi_ssid) + 1:%d", strlen(wifi_ssid) + 1);
+    for (uint8_t i = 0; i < strlen(wifi_ssid) + 1; i++)
         wifi_config.sta.ssid[i] = wifi_ssid[i];
-    ESP_LOGI(TAG, "strlen(wifi_pass) + 1:%d",strlen(wifi_pass) + 1);
-    for(uint8_t i=0; i< strlen(wifi_pass) + 1;i++)
+    ESP_LOGI(TAG, "strlen(wifi_pass) + 1:%d", strlen(wifi_pass) + 1);
+    for (uint8_t i = 0; i < strlen(wifi_pass) + 1; i++)
         wifi_config.sta.password[i] = wifi_pass[i];
-    ESP_LOGI(TAG, "wifi_ssid:%s",wifi_config.sta.ssid); 
-    ESP_LOGI(TAG, "wifi_pass:%s",wifi_config.sta.password); 
+    ESP_LOGI(TAG, "wifi_ssid:%s", wifi_config.sta.ssid);
+    ESP_LOGI(TAG, "wifi_pass:%s", wifi_config.sta.password);
 
-    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA) );
-    ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config) );
-    ESP_ERROR_CHECK(esp_wifi_start() );
+    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
+    ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
+    ESP_ERROR_CHECK(esp_wifi_start());
 
     ESP_LOGI(TAG, "wifi_init_sta finished.");
 
     /* Waiting until either the connection is established (WIFI_CONNECTED_BIT) or connection failed for the maximum
      * number of re-tries (WIFI_FAIL_BIT). The bits are set by event_handler() (see above) */
     EventBits_t bits = xEventGroupWaitBits(s_wifi_event_group,
-            WIFI_CONNECTED_BIT | WIFI_FAIL_BIT,
-            pdFALSE,
-            pdFALSE,
-            portMAX_DELAY);
+                                           WIFI_CONNECTED_BIT | WIFI_FAIL_BIT,
+                                           pdFALSE,
+                                           pdFALSE,
+                                           portMAX_DELAY);
 
     /* xEventGroupWaitBits() returns the bits before the call returned, hence we can test which event actually
      * happened. */
-    if (bits & WIFI_CONNECTED_BIT) {
+    if (bits & WIFI_CONNECTED_BIT)
+    {
         ESP_LOGI(TAG, "connected to ap SSID:%s password:%s",
                  EXAMPLE_ESP_WIFI_SSID, EXAMPLE_ESP_WIFI_PASS);
-    } else if (bits & WIFI_FAIL_BIT) {
+    }
+    else if (bits & WIFI_FAIL_BIT)
+    {
         ESP_LOGI(TAG, "Failed to connect to SSID:%s, password:%s",
                  EXAMPLE_ESP_WIFI_SSID, EXAMPLE_ESP_WIFI_PASS);
-    } else {
+    }
+    else
+    {
         ESP_LOGE(TAG, "UNEXPECTED EVENT");
     }
 
@@ -165,34 +178,34 @@ void wifi_reset(void)
     char *wifi_pass = {0};
     wifi_ssid = parameter_read_wifi_ssid();
     wifi_pass = parameter_read_wifi_pass();
-    ESP_LOGI(TAG, "wifi_ssid:%s",wifi_ssid); 
-    ESP_LOGI(TAG, "wifi_pass:%s",wifi_pass); 
+    ESP_LOGI(TAG, "wifi_ssid:%s", wifi_ssid);
+    ESP_LOGI(TAG, "wifi_pass:%s", wifi_pass);
 
     esp_wifi_stop();
     esp_wifi_disconnect();
-    //esp_wifi_deinit();
+    // esp_wifi_deinit();
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
 
     wifi_config_t wifi_config = {
         .sta = {
-            .ssid = BACKUP_EXAMPLE_ESP_WIFI_SSID, //"yyg",
-            .password = BACKUP_EXAMPLE_ESP_WIFI_PASS,//"123456789",
-            /* Setting a password implies station will connect to all security modes including WEP/WPA.
-             * However these modes are deprecated and not advisable to be used. Incase your Access point
-             * doesn't support WPA2, these mode can be enabled by commenting below line */
-	     .threshold.authmode = WIFI_AUTH_WPA2_PSK,
+            .ssid = BACKUP_EXAMPLE_ESP_WIFI_SSID,     //"yyg",
+            .password = BACKUP_EXAMPLE_ESP_WIFI_PASS, //"123456789",
+                                                      /* Setting a password implies station will connect to all security modes including WEP/WPA.
+                                                       * However these modes are deprecated and not advisable to be used. Incase your Access point
+                                                       * doesn't support WPA2, these mode can be enabled by commenting below line */
+            .threshold.authmode = WIFI_AUTH_WPA2_PSK,
         },
     };
-    ESP_LOGI(TAG, "strlen(wifi_ssid) + 1:%d",strlen(wifi_ssid) + 1);
-    for(uint8_t i=0; i< strlen(wifi_ssid) + 1;i++)
+    ESP_LOGI(TAG, "strlen(wifi_ssid) + 1:%d", strlen(wifi_ssid) + 1);
+    for (uint8_t i = 0; i < strlen(wifi_ssid) + 1; i++)
         wifi_config.sta.ssid[i] = wifi_ssid[i];
-    ESP_LOGI(TAG, "strlen(wifi_pass) + 1:%d",strlen(wifi_pass) + 1);
-    for(uint8_t i=0; i< strlen(wifi_pass) + 1;i++)
+    ESP_LOGI(TAG, "strlen(wifi_pass) + 1:%d", strlen(wifi_pass) + 1);
+    for (uint8_t i = 0; i < strlen(wifi_pass) + 1; i++)
         wifi_config.sta.password[i] = wifi_pass[i];
-    ESP_ERROR_CHECK( esp_wifi_init(&cfg) );
-    ESP_ERROR_CHECK( esp_wifi_set_mode(WIFI_MODE_STA) );
-    ESP_ERROR_CHECK( esp_wifi_set_config(WIFI_IF_STA, &wifi_config) );
-    ESP_ERROR_CHECK( esp_wifi_start() );
+    ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
+    ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
+    ESP_ERROR_CHECK(esp_wifi_start());
 }
 
 // void wifi_inital_set(void)
@@ -227,18 +240,18 @@ void wifi_reset(void)
 
 void wifi_connect(void)
 {
-    //Initialize NVS
+    // Initialize NVS
     esp_err_t ret = nvs_flash_init();
-    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-      ESP_ERROR_CHECK(nvs_flash_erase());
-      ret = nvs_flash_init();
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
+    {
+        ESP_ERROR_CHECK(nvs_flash_erase());
+        ret = nvs_flash_init();
     }
     ESP_ERROR_CHECK(ret);
 
     ESP_LOGI(TAG, "ESP_WIFI_MODE_STA");
     wifi_init_sta();
 }
-
 
 // int8_t get_rssi(void)
 // {
@@ -254,7 +267,7 @@ void wifi_connect(void)
 //     memset(ap_info, 0, sizeof(ap_info));
 //     if (esp_wifi_get_config(WIFI_IF_STA, &wifi_sta_cfg) != ESP_OK)//获取已连接的ap参数
 //     {
-//         ESP_LOGI(TAG, "esp_wifi_get_config err");  
+//         ESP_LOGI(TAG, "esp_wifi_get_config err");
 //         return -90;
 //     }
 
@@ -270,7 +283,7 @@ void wifi_connect(void)
 //         ESP_LOGI(TAG, "SSID \t\t%s", ap_info[i].ssid);
 //         ESP_LOGI(TAG, "RSSI \t\t%d", ap_info[i].rssi);
 //         ESP_LOGI(TAG, "Channel \t\t%d", ap_info[i].primary);
-//         ESP_LOGI(TAG, "BSSID: \t\t%02x:%02x:%02x:%02x:%02x:%02x", 
+//         ESP_LOGI(TAG, "BSSID: \t\t%02x:%02x:%02x:%02x:%02x:%02x",
 //                                                         ap_info[i].bssid[0],
 //                                                         ap_info[i].bssid[1],
 //                                                         ap_info[i].bssid[2],
@@ -278,7 +291,7 @@ void wifi_connect(void)
 //                                                         ap_info[i].bssid[4],
 //                                                         ap_info[i].bssid[5]);
 //     }
-//     esp_wifi_scan_stop(); 
+//     esp_wifi_scan_stop();
 //     //from start to stop need 3210ms
 //     ESP_LOGI(TAG,"stop scan\r\n");
 
@@ -291,20 +304,21 @@ int8_t get_rssi(void)
 {
     wifi_ap_record_t ap;
     esp_wifi_sta_get_ap_info(&ap);
-    //printf("%d\n", ap.rssi);
+    // printf("%d\n", ap.rssi);
     ESP_LOGI(TAG, "RSSI \t\t%d", ap.rssi);
     return ap.rssi;
 }
 void wifi_scan(void)
 {
     int8_t value = 0;
-    for(;;)
+    for (;;)
     {
-        if(parameter_read_wifi_connection()){
+        if (parameter_read_wifi_connection())
+        {
             value = get_rssi();
-            parameter_write_rssi(value); 
+            parameter_write_rssi(value);
         }
-        //vTaskDelay(600000 / portTICK_RATE_MS);      
-        vTaskDelay(6000 / portTICK_RATE_MS);    
+        // vTaskDelay(600000 / portTICK_RATE_MS);
+        vTaskDelay(6000 / portTICK_RATE_MS);
     }
 }
