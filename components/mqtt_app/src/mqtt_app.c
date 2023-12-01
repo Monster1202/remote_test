@@ -38,6 +38,8 @@
 #define TOPIC_BLISTER_STATES "/blister-device/states"
 #define TOPIC_REMOTE_CONTROL "/remote-control-device/switch-control"
 #define TOPIC_REMOTE_STATES "/remote-control-device/states"
+
+#define TOPIC_SUCTION_CONTROL "/suction/control"
 //PARAMETER_BRUSH brush_para;
 #define DEVICE_TYPE_REMOTE
 
@@ -321,6 +323,10 @@ void device_states_publish(uint8_t button)
         msg_id = esp_mqtt_client_publish(mqtt_client, TOPIC_BRUSH_CONTROL, data_pub_1, 0, 1, 0);break;
         case 4:data_publish(data_pub_1,8);
         msg_id = esp_mqtt_client_publish(mqtt_client, TOPIC_EMERGENCY_CONTROL, data_pub_1, 0, 1, 0);break;
+        case 10:data_publish(data_pub_1,10);
+        msg_id = esp_mqtt_client_publish(mqtt_client, TOPIC_SUCTION_CONTROL, data_pub_1, 0, 1, 0);break;
+        case 11:data_publish(data_pub_1,11);
+        msg_id = esp_mqtt_client_publish(mqtt_client, TOPIC_SUCTION_CONTROL, data_pub_1, 0, 1, 0);break;
         default:break;
     }   
 #endif    
@@ -363,6 +369,12 @@ void data_publish(char *data,uint8_t case_pub)
         cJSON_AddNumberToObject(root, "status",remote_buf.status);
         cJSON_AddNumberToObject(root, "rssi",remote_buf.rssi);
         cJSON_AddNumberToObject(root, "battery",remote_buf.battery);
+        }
+    else if(case_pub == 10){
+        cJSON_AddNumberToObject(root, "suction",1);
+        }
+    else if(case_pub == 11){
+        cJSON_AddNumberToObject(root, "suction",0);
         }
 
     char *msg = cJSON_Print(root);

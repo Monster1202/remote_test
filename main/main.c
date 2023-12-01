@@ -80,15 +80,15 @@ void app_main(void)
     gpio_init();
 
     //xTaskCreatePinnedToCore(touch_input, "touch_input", 4096, NULL, 10, NULL,  0);
-    xTaskCreatePinnedToCore(lcd_icon_task, "lcd_icon_task", 8192, NULL, 24, NULL,  0);
+    xTaskCreatePinnedToCore(lcd_icon_task, "lcd_icon_task", 8192, NULL, 8, NULL,  0);
     xTaskCreatePinnedToCore(lcd_clear_task, "lcd_clear_task", 4096, NULL, 5, NULL,  0);
     wifi_connect();
     //xTaskCreate(wifi_scan, "wifi_scan", 4096, NULL, 6, NULL);
 
     uint8_t *jpeg_buf = heap_caps_malloc(BOOT_ANIMATION_MAX_SIZE, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
     assert(jpeg_buf != NULL);
-    xTaskCreatePinnedToCore(lcd_draw, "lcd_draw", 10240, NULL, 21, NULL,  1);  //(void *)(lcd_buffer)
-    xTaskCreatePinnedToCore(http_test_task, "http_test_task", 10240, (void *)(jpeg_buf), 23, NULL,  0);
+    xTaskCreatePinnedToCore(lcd_draw, "lcd_draw", 10240, NULL, 6, NULL,  1);  //(void *)(lcd_buffer)
+    xTaskCreatePinnedToCore(http_test_task, "http_test_task", 10240, (void *)(jpeg_buf), 7, NULL,  0);
 
     // esp_vfs_spiffs_conf_t spiffs_config = {
     //     .base_path              = "/spiffs",

@@ -116,7 +116,7 @@ static int http_perform_as_stream_reader(void *sbuffer,void *output_buffer)
         esp_http_client_close(client);
         esp_http_client_cleanup(client);
         //free(buffer);
-        vTaskDelay(5000 / portTICK_RATE_MS);    
+        vTaskDelay(3000 / portTICK_RATE_MS);    
         return;
     }       
     int content_length =  esp_http_client_fetch_headers(client);  //debug content_length: 0  esp_http_perform();
@@ -136,7 +136,7 @@ static int http_perform_as_stream_reader(void *sbuffer,void *output_buffer)
         esp_http_client_close(client);
         esp_http_client_cleanup(client);
         //free(buffer);
-        //vTaskDelay(5000 / portTICK_RATE_MS);    
+        //vTaskDelay(1000 / portTICK_RATE_MS);    
         return;
     }
     //buffer[read_len] = 0;
@@ -216,7 +216,7 @@ void http_test_task(void *pvParameters)
         // else
         //     printf("parameter_read_refresh==1");
         http_perform_as_stream_reader(pvParameters,0);   
-        vTaskDelay(40 / portTICK_RATE_MS);     //50ms   14FPS   
+        vTaskDelay(50 / portTICK_RATE_MS);     //50ms   14FPS   
     }           
 }
 
@@ -248,7 +248,7 @@ void lcd_draw(void *pvParameters)
             // else
             //     printf("parameter_read_refresh==1");
             mjpegdraw((uint8_t *)data_get.msg, data_get.sender, output_buffer, lcd_write_bitmap);
-            vTaskDelay(10 / portTICK_RATE_MS);
+            vTaskDelay(20 / portTICK_RATE_MS);
 
             free(data_get.msg); 
             //ESP_LOGI(TAG1, "draw_lcd");

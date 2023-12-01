@@ -546,7 +546,8 @@ uint8_t tca9554_ext_io_read(void)
             register_value = parameter_read_nozzle();
             register_afterpress = UI_press_output(register_value,1);
             nozzle_io_out(register_afterpress);
-            device_states_publish(3); 
+            //device_states_publish(3); 
+            device_states_publish(10);
             break;
             case 0x7E:
             input_cnt = PLUS_KEY_READ(0x7E);
@@ -554,7 +555,8 @@ uint8_t tca9554_ext_io_read(void)
             register_value = parameter_read_nozzle();
             register_afterpress = UI_press_output(register_value,2);
             nozzle_io_out(register_afterpress);
-            device_states_publish(3); 
+            //device_states_publish(3); 
+            device_states_publish(11);
             break;
             case 0x3F:
             input_cnt = PLUS_KEY_READ(0x3F);
